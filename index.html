@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Balwant | Front-End Developer</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;800&display=swap" rel="stylesheet">
+<style>
+/* ===== 1. DESIGN TOKENS (colours live here so the whole site can change in one place) ===== */
+:root{
+  --bg:#eceaff;--tx:#1d1b3a;--mut:#58567f;--gl:rgba(255,255,255,.55);--bd:rgba(255,255,255,.9);
+  --ac:#6f5cff;--ac2:#10b5a3;--pink:#ff4fd8;--amber:#ffb35c;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1024;--tx:#eef0ff;--mut:#a9aed6;--gl:rgba(255,255,255,.07);--bd:rgba(255,255,255,.14);--ac:#8b7bff;--ac2:#38d6c4}}
+:root[data-theme="dark"]{--bg:#0f1024;--tx:#eef0ff;--mut:#a9aed6;--gl:rgba(255,255,255,.07);--bd:rgba(255,255,255,.14);--ac:#8b7bff;--ac2:#38d6c4}
+
+/* ===== 2. RESET + BASE ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth;scroll-padding-top:96px;height:100%}
+body{font-family:'Poppins',system-ui,sans-serif;background:var(--bg);color:var(--tx);line-height:1.6;overflow-x:hidden;min-height:100%}
+a{color:inherit}
+h2{font-size:1.25rem;font-weight:600;margin-bottom:16px}
+p{color:var(--mut)}
+.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* Floating blurred colour blobs behind everything (position:fixed + z-index) */
+.blob{position:fixed;border-radius:50%;filter:blur(90px);z-index:0;pointer-events:none}
+.b1{width:380px;height:380px;background:var(--ac);top:-90px;left:-90px;opacity:.5}
+.b2{width:340px;height:340px;background:var(--ac2);bottom:-90px;right:-70px;opacity:.38}
+.b3{width:260px;height:260px;background:var(--pink);top:55%;left:55%;opacity:.22}
+
+.wrap{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:16px 20px 30px}
+section{margin-bottom:22px}
+
+/* Glass = translucent background + blur + soft border (used on every card) */
+.glass{background:var(--gl);border:1px solid var(--bd);border-radius:20px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:26px}
+
+/* ===== 3. NAVBAR (Flexbox, sticky, CSS-only hamburger) ===== */
+.nav{position:sticky;top:calc(env(safe-area-inset-top,0px) + 10px);z-index:20;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 20px;margin-bottom:22px}
+.logo{font-weight:800;letter-spacing:1px;text-decoration:none}
+.links{display:flex;gap:4px}
+.links a{color:var(--mut);text-decoration:none;font-size:.9rem;padding:6px 12px;border-radius:999px;transition:background .2s,color .2s}
+.links a:hover,.links a:focus-visible{background:var(--ac);color:#fff;outline:none}
+.soc{display:flex;gap:10px}
+.soc a{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;border:1px solid var(--bd);transition:transform .2s,background .2s}
+.soc a:hover,.soc a:focus-visible{background:var(--ac2);color:#0f1024;transform:translateY(-3px);outline:none}
+.tog{position:absolute;opacity:0;pointer-events:none}   /* hidden checkbox = the "memory" of the menu */
+.burger{display:none;cursor:pointer;width:38px;height:38px;border-radius:10px;border:1px solid var(--bd);place-items:center}
+.burger span,.burger span::before,.burger span::after{display:block;width:18px;height:2px;background:var(--tx);border-radius:2px;position:relative;content:""}
+.burger span::before{position:absolute;top:-6px}
+.burger span::after{position:absolute;top:6px}
+
+/* ===== 4. HERO (Flexbox split layout + keyframe animation) ===== */
+.hero{display:flex;align-items:center;justify-content:space-between;gap:30px;padding:44px 40px}
+.hi{color:var(--ac2);font-weight:500}
+h1{font-size:clamp(2.6rem,7vw,4.4rem);font-weight:800;line-height:1.05;letter-spacing:2px}
+.role{font-size:1.3rem;font-weight:400;color:var(--mut);margin:6px 0 14px}
+.hero p{max-width:44ch}
+.btns{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}
+.btn{text-decoration:none;border:1px solid var(--bd);padding:10px 22px;border-radius:999px;font-weight:500;transition:transform .2s,box-shadow .2s}
+.btn.p{background:linear-gradient(135deg,var(--ac),#5b8bff);border-color:transparent;color:#fff}
+.btn:hover,.btn:focus-visible{transform:translateY(-3px);box-shadow:0 10px 24px rgba(111,92,255,.35);outline:none}
+.avatar{flex:none;width:200px;aspect-ratio:1;border-radius:50%;padding:5px;background:linear-gradient(135deg,var(--ac),var(--ac2));animation:float 6s ease-in-out infinite}
+.avatar img{display:block;width:100%;height:100%;border-radius:50%;object-fit:cover;border:4px solid var(--bg)}
+@keyframes float{50%{transform:translateY(-12px)}}
+
+/* ===== 5. ABOUT (Grid: text + quick facts) ===== */
+.about{display:grid;grid-template-columns:1.6fr 1fr;gap:24px;align-items:start}
+.facts{display:grid;gap:10px}
+.fact{padding:12px 16px;border-radius:14px;border:1px dashed var(--bd);font-size:.85rem;color:var(--mut)}
+.fact b{display:block;color:var(--tx);font-weight:600}
+
+/* ===== 6. SKILLS (Bento grid, pills, no fake percentages) ===== */
+.bento{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.bento .glass{padding:20px}
+.bento h3{font-size:.95rem;font-weight:600;margin-bottom:12px}
+.pill{display:inline-block;margin:0 6px 8px 0;padding:5px 14px;font-size:.82rem;border-radius:99px;border:1px solid var(--bd);background:var(--gl);transition:transform .2s,background .2s,color .2s}
+.pill:hover{background:var(--ac);color:#fff;transform:translateY(-2px)}
+.wide{grid-column:span 2}
+
+/* ===== 7. PROJECTS (Grid of cards with hover lift) ===== */
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.proj{padding:0;overflow:hidden;display:flex;flex-direction:column;transition:transform .25s}
+.proj:hover{transform:translateY(-8px)}
+.shot{height:130px;display:grid;place-items:center;font-size:2.8rem;background:linear-gradient(135deg,var(--ac),var(--ac2))}
+.proj:nth-child(2) .shot{background:linear-gradient(135deg,#5b8bff,var(--pink))}
+.proj:nth-child(3) .shot{background:linear-gradient(135deg,var(--amber),var(--pink))}
+.pbody{padding:20px;display:flex;flex-direction:column;gap:10px;flex:1}
+.pbody h3{font-size:1.05rem}
+.pbody p{font-size:.88rem;flex:1}
+.tag{display:inline-block;font-size:.75rem;padding:3px 10px;border-radius:99px;background:var(--bd);margin-right:4px}
+.status{font-size:.75rem;color:var(--ac2);font-weight:600}
+.pbtn{display:flex;gap:10px;margin-top:4px}
+.pbtn a{font-size:.82rem;text-decoration:none;padding:6px 14px;border-radius:99px;border:1px solid var(--bd);transition:background .2s,color .2s}
+.pbtn a:hover,.pbtn a:focus-visible{background:var(--ac);color:#fff;outline:none}
+
+/* ===== 8. EDUCATION TIMELINE (border-left + absolute dots) ===== */
+.tl{border-left:2px solid var(--ac);padding-left:22px;display:grid;gap:16px}
+.tl div{position:relative;font-size:.9rem;color:var(--mut)}
+.tl div::before{content:"";position:absolute;left:-29px;top:7px;width:12px;height:12px;border-radius:50%;background:var(--ac2)}
+.tl b{display:block;color:var(--tx);font-weight:600}
+
+/* ===== 9. CONTACT (Grid: info + form) ===== */
+.contact{display:grid;grid-template-columns:1fr 1.2fr;gap:28px}
+.row{display:flex;gap:12px;align-items:center;color:var(--mut);font-size:.92rem;padding:6px 0;word-break:break-word}
+.row .i{color:var(--ac2)}
+.contact h3{font-size:1.6rem;font-weight:600;line-height:1.25;margin-bottom:14px}
+form{display:grid;gap:12px}
+label{font-size:.82rem;color:var(--mut)}
+input,textarea{width:100%;font:inherit;font-size:.92rem;color:var(--tx);background:var(--gl);border:1px solid var(--bd);border-radius:12px;padding:10px 14px;transition:border-color .2s,box-shadow .2s}
+input:focus,textarea:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 3px rgba(111,92,255,.25)}
+textarea{min-height:110px;resize:vertical}
+button.btn{font:inherit;font-weight:500;cursor:pointer;justify-self:start;color:#fff}
+
+/* ===== 10. BUSINESS CARD (glass + neon gradient border like your reference) ===== */
+.cardwrap{display:flex;flex-direction:column;align-items:center}
+.cardwrap h2{align-self:flex-start}
+.bcard{position:relative;width:100%;max-width:560px;border-radius:26px;padding:28px;
+  background:linear-gradient(135deg,rgba(255,255,255,.22),rgba(255,255,255,.05));
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  box-shadow:0 0 30px rgba(255,79,216,.35),0 0 60px rgba(255,179,92,.2);
+  animation:glow 4s ease-in-out infinite;transition:transform .35s}
+.bcard:hover{transform:perspective(800px) rotateX(4deg) rotateY(-5deg) translateY(-6px)}
+/* the gradient border: a pseudo-element masked so only its 2px ring is visible */
+.bcard::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:2px;background:linear-gradient(135deg,var(--pink),var(--amber),var(--ac));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+@keyframes glow{50%{box-shadow:0 0 44px rgba(255,79,216,.55),0 0 80px rgba(255,179,92,.32)}}
+.ctop{display:flex;align-items:center;gap:16px}
+.cav{flex:none;width:76px;height:76px;border-radius:50%;padding:3px;background:linear-gradient(135deg,var(--pink),var(--amber))}
+.cav img{display:block;width:100%;height:100%;border-radius:50%;object-fit:cover;border:3px solid var(--bg)}
+.bcard h3{font-size:1.6rem;font-weight:800;letter-spacing:1.5px;line-height:1.1}
+.bcard .sub{font-size:.9rem;color:var(--mut)}
+.cq{margin:16px 0;font-style:italic;font-size:.9rem;color:var(--mut)}
+.cstats{display:grid;grid-template-columns:repeat(3,1fr);text-align:center;padding:12px 0;border-block:1px solid var(--bd);margin-bottom:14px}
+.cstats b{display:block;font-size:1.1rem}
+.cstats span{font-size:.75rem;color:var(--mut)}
+.cfoot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px}
+.cfoot small{color:var(--mut);font-size:.78rem}
+
+footer{text-align:center;color:var(--mut);font-size:.85rem;margin-top:30px}
+footer nav{display:flex;justify-content:center;gap:18px;margin-top:6px}
+footer a{text-decoration:none;transition:color .2s}
+footer a:hover{color:var(--ac)}
+
+/* ===== 11. RESPONSIVE (tablet, then mobile) ===== */
+@media (max-width:900px){
+  .bento,.pgrid{grid-template-columns:1fr 1fr}
+  .wide{grid-column:1/-1}
+  .pgrid .proj:last-child{grid-column:1/-1}
+}
+@media (max-width:760px){
+  .nav{flex-wrap:wrap}
+  .burger{display:grid;order:2}
+  .nav .soc{display:none}
+  .links{display:none;flex-direction:column;width:100%;order:3}
+  .tog:checked ~ .links{display:flex}          /* checkbox ticked = menu open */
+  .tog:focus-visible + .burger{outline:2px solid var(--ac)}
+  .hero{flex-direction:column-reverse;text-align:center;padding:28px 22px}
+  .hero p{margin:0 auto}.btns{justify-content:center}.avatar{width:150px}
+  .about,.contact{grid-template-columns:1fr}
+}
+@media (max-width:560px){
+  .bento,.pgrid{grid-template-columns:1fr}
+  .wide,.pgrid .proj:last-child{grid-column:auto}
+  .glass{padding:20px}
+  .bcard{padding:22px}
+  .cstats b{font-size:.95rem}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<!-- SVG icon sprite, reused with <use> -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="li" viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2zM4 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"/></symbol>
+<symbol id="gh" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.4 3.4 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.4 5.4 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.4 13.4 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.4 5.4 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.4 3.4 0 0 0 9 18.13V22"/></symbol>
+<symbol id="ig" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37zM17.5 6.5h.01"/></symbol>
+<symbol id="mail" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></symbol>
+<symbol id="ph" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
+<symbol id="pin" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></symbol>
+</defs></svg>
+
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+
+<div class="wrap">
+
+<header class="glass nav">
+  <a class="logo" href="#home">&lt;/&gt; BALWANT</a>
+  <input type="checkbox" id="menu" class="tog" aria-label="Toggle menu">
+  <label for="menu" class="burger" aria-hidden="true"><span></span></label>
+  <nav class="links" aria-label="Main">
+    <a href="#home">Home</a><a href="#about">About</a><a href="#skills">Skills</a>
+    <a href="#projects">Projects</a><a href="#education">Education</a><a href="#contact">Contact</a><a href="#card">My card</a>
+  </nav>
+  <div class="soc">
+    <a href="https://www.linkedin.com/" target="_blank" rel="noopener" aria-label="LinkedIn"><svg class="i"><use href="#li"/></svg></a>
+    <a href="https://github.com/balwant1201" target="_blank" rel="noopener" aria-label="GitHub"><svg class="i"><use href="#gh"/></svg></a>
+    <a href="https://www.instagram.com/balwantgupta6678" target="_blank" rel="noopener" aria-label="Instagram"><svg class="i"><use href="#ig"/></svg></a>
+  </div>
+</header>
+
+<main>
+
+  <!-- WHO ARE YOU? -->
+  <section class="glass hero" id="home">
+    <div>
+      <div class="hi">Hello, I’m</div>
+      <h1>BALWANT</h1>
+      <p class="role">Front-End Developer</p>
+      <p>I build responsive, good-looking web pages with HTML and CSS, and I’m learning JavaScript next.</p>
+      <div class="btns">
+        <a class="btn p" href="#projects">View my work</a>
+        <a class="btn" href="https://github.com/balwant1201" target="_blank" rel="noopener">GitHub</a>
+        <a class="btn" href="#contact">Get in touch</a>
+      </div>
+    </div>
+    <div class="avatar"><img src="photo.jpg.jpg" alt="Photo of Balwant"></div>
+  </section>
+
+  <!-- WHAT DO YOU DO? -->
+  <section class="glass about" id="about">
+    <div>
+      <h2>About me</h2>
+      <p>I’m a Computer Science student who likes turning ideas into clean, working web pages. I learn by building small projects and trying new things every week.</p>
+    </div>
+    <div class="facts">
+      <div class="fact">Studying<b>B.Tech CSE, Scaler School of Technology</b></div>
+      <div class="fact">Based in<b>Banglore, India</b></div>
+    </div>
+  </section>
+
+  <!-- WHAT TECHNOLOGIES DO YOU KNOW? -->
+  <section id="skills">
+    <h2>Skills</h2>
+    <div class="bento">
+      <div class="glass wide"><h3>Frontend</h3>
+        <span class="pill">HTML</span><span class="pill">CSS</span><span class="pill">Flexbox</span><span class="pill">CSS Grid</span><span class="pill">Responsive design</span><span class="pill">Transitions &amp; animations</span>
+      </div>
+      <div class="glass"><h3>Tools</h3>
+        <span class="pill">Git</span><span class="pill">GitHub</span><span class="pill">VS Code</span>
+      </div>
+      <div class="glass wide"><h3>Currently learning</h3>
+        <span class="pill">JavaScript</span><span class="pill">React</span><span class="pill">Node.js</span>
+      </div>
+      <div class="glass"><h3>Interests</h3>
+        <span class="pill">UI/UX</span><span class="pill">Problem solving</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT HAVE YOU BUILT? -->
+  <section id="projects">
+    <h2>Projects</h2>
+    <div class="pgrid">
+      <article class="glass proj">
+        <div class="shot" aria-hidden="true">🌐</div>
+        <div class="pbody">
+          <span class="status">Completed</span>
+          <h3>Portfolio website</h3>
+          <p>The site you’re on: a responsive glassmorphism portfolio with a CSS-only mobile menu and business card.</p>
+          <div><span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">Grid</span><span class="tag">Flexbox</span></div>
+          <div class="pbtn"><a href="#home">Live demo</a><a href="https://github.com/balwant1201" target="_blank" rel="noopener">GitHub</a></div>
+        </div>
+      </article>
+      <article class="glass proj">
+        <div class="shot" aria-hidden="true">⛅</div>
+        <div class="pbody">
+          <span class="status">In progress</span>
+          <h3>Weather app</h3>
+          <p>A small app that will show live weather from an API, once I finish learning JavaScript.</p>
+          <div><span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">JavaScript</span></div>
+          <div class="pbtn"><a href="https://github.com/balwant1201" target="_blank" rel="noopener">GitHub</a></div>
+        </div>
+      </article>
+      <article class="glass proj">
+        <div class="shot" aria-hidden="true">✅</div>
+        <div class="pbody">
+          <span class="status">In progress</span>
+          <h3>To-do app</h3>
+          <p>A simple task list to practise forms, lists and DOM updates.</p>
+          <div><span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">JavaScript</span></div>
+          <div class="pbtn"><a href="https://github.com/balwant1201" target="_blank" rel="noopener">GitHub</a></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="glass" id="education">
+    <h2>Education</h2>
+    <div class="tl">
+      <div><b>B.Tech, Computer Science &amp; Engineering</b>Scaler School of Technology, currently pursuing</div>
+      <div><b>Web development journey</b>Learning and building projects every week, from HTML and CSS towards JavaScript and React.</div>
+    </div>
+  </section>
+
+  <!-- HOW CAN SOMEONE CONTACT YOU? -->
+  <section class="glass contact" id="contact">
+    <div>
+      <h3>Let’s build something together.</h3>
+      <div class="row"><svg class="i"><use href="#mail"/></svg><a href="mailto:kbalwant433@gamil.com">kbalwant433@gmail.com</a></div>
+      <div class="row"><svg class="i"><use href="#ph"/></svg>+91 7739717550</div>
+      <div class="row"><svg class="i"><use href="#pin"/></svg>Banglore, India</div>
+      <div class="soc" style="margin-top:14px">
+        <a href="https://www.linkedin.com/" target="_blank" rel="noopener" aria-label="LinkedIn"><svg class="i"><use href="#li"/></svg></a>
+        <a href="https://github.com/balwant1201" target="_blank" rel="noopener" aria-label="GitHub"><svg class="i"><use href="#gh"/></svg></a>
+        <a href="https://www.instagram.com/balwantgupta6678" target="_blank" rel="noopener" aria-label="Instagram"><svg class="i"><use href="#ig"/></svg></a>
+      </div>
+    </div>
+    <form action="mailto:kbalwant433@gamil.com" method="post" enctype="text/plain">
+      <div><label for="n">Name</label><input id="n" name="name" type="text" required></div>
+      <div><label for="e">Email</label><input id="e" name="email" type="email" required></div>
+      <div><label for="m">Message</label><textarea id="m" name="message" required></textarea></div>
+      <button class="btn p" type="submit">Send message</button>
+    </form>
+  </section>
+
+  <!-- BUSINESS CARD -->
+  <section class="cardwrap" id="card">
+    <h2>My business card</h2>
+    <article class="bcard">
+      <div class="ctop">
+        <div class="cav"><img src="photo.jpg.jpg" alt="Photo of Balwant"></div>
+        <div><h3>BALWANT</h3><div class="sub">Front-End Developer</div></div>
+      </div>
+      <p class="cq">“Better code. Better experiences.”</p>
+      <div class="cstats">
+        <div><b>3</b><span>projects</span></div>
+        <div><b>HTML · CSS</b><span>main stack</span></div>
+        <div><b>B.Tech</b><span>CSE</span></div>
+      </div>
+      <div class="row"><svg class="i"><use href="#mail"/></svg>kbalwant433@gmail.com</div>
+      <div class="row"><svg class="i"><use href="#ph"/></svg>+91 7739717550</div>
+      <div class="row"><svg class="i"><use href="#pin"/></svg>Banglore, India</div>
+      <div class="cfoot">
+        <small>Scaler School of Technology</small>
+        <div class="soc">
+          <a href="https://www.linkedin.com/" target="_blank" rel="noopener" aria-label="LinkedIn"><svg class="i"><use href="#li"/></svg></a>
+          <a href="https://github.com/balwant1201" target="_blank" rel="noopener" aria-label="GitHub"><svg class="i"><use href="#gh"/></svg></a>
+          <a href="https://www.instagram.com/balwantgupta6678" target="_blank" rel="noopener" aria-label="Instagram"><svg class="i"><use href="#ig"/></svg></a>
+        </div>
+      </div>
+    </article>
+  </section>
+
+</main>
+
+<footer>
+  <p>© 2026 Balwant. Built with HTML &amp; CSS.</p>
+  <nav aria-label="Footer"><a href="https://github.com/balwant1201" target="_blank" rel="noopener">GitHub</a><a href="https://www.linkedin.com/" target="_blank" rel="noopener">LinkedIn</a><a href="mailto:kbalwant433@gmail.com">Email</a></nav>
+</footer>
+
+</div>
+</body>
+</html>
